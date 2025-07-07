@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Search Recipes</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 2rem;
+      background: #fffdf8;
+    }
+
+    .search-box {
+      max-width: 600px;
+      margin: auto;
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-box h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+      color: #333;
+    }
+
+    .search-box label {
+      font-weight: bold;
+      margin-top: 1rem;
+      display: block;
+      color: #444;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.8rem;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      background-color: #ff7043;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #ff5722;
+    }
+
+    .results {
+      margin-top: 3rem;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .results {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .recipe-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .recipe-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .recipe-card h3 {
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      color: #333;
+    }
+
+    .recipe-card p {
+      margin-bottom: 0.5rem;
+      color: #666;
+    }
+
+    .no-results, .error-message {
+      text-align: center;
+      color: #999;
+      margin-top: 2rem;
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="search-box">
+    <h1>Search Recipes</h1>
+    
+
+    <label for="ingredientInput">Ingredient</label>
+    <input type="text" id="ingredientInput" placeholder="e.g. chicken, broccoli, squash" />
+
+    <label for="calorieSelect">Calorie Range</label>
+    <select id="calorieSelect">
+      <option value="">Any</option>
+      <option value="0-200">Under 200 cal</option>
+      <option value="200-400">200–400 cal</option>
+      <option value="400-600">400–600 cal</option>
+      <option value="600+">600+ cal</option>
+    </select>
+
+    <label for="proteinSelect">Protein Range</label>
+    <select id="proteinSelect">
+      <option value="">Any</option>
+      <option value="0-10">Low (0–10g)</option>
+      <option value="10-20">Medium (10–20g)</option>
+      <option value="20+">High (20g+)</option>
+    </select>
+
+    <button onclick="performSearch()">Search</button>
+    <br><br>
+    <a href="index.html"><button class = "title">Home</button></a>
+
+    <div class="results" id="results"></div>
+  </div>
+
+  <script>
+    async function performSearch() {
+  const ingredient = document.getElementById("ingredientInput").value.trim();
+  const calorie = document.getElementById("calorieSelect").value;
+  const protein = document.getElementById("proteinSelect").value;
+
+  try {
+    const response = await fetch("http://localhost:5000/api/search", {
+      method: "POST", 
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        ingredient,
+        calorie,
+        protein
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error("Something went wrong with the API request.");
+    }
+
+    const data = await response.json();
+
+    // Display the results
+    const resultsDiv = document.getElementById("results");
+    if (data.length === 0) {
+      resultsDiv.innerHTML = "<p>No recipes found!</p>";
+    } else {
+      resultsDiv.innerHTML = data.map(r => `
+        <div class="recipe-card">
+          <h3>${r.title}</h3>
+          <p><strong>Calories:</strong> ${r.calories}</p>
+          <p><strong>Protein:</strong> ${r.protein}g</p>
+          <p><strong>Ingredients:</strong> ${Array.isArray(r.ingredients) ? r.ingredients.join(", ") : r.ingredients}</p>
+        </div>
+      `).join("");
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    document.getElementById("results").innerHTML = `<p class="error-message">Error: ${error.message}</p>`;
+
+
+  }
+}
+
+  </script>
+</body>
+</html>

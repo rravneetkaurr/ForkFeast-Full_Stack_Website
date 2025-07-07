@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Recipes</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 2rem;
+      background: #fffdf8;
+    }
+
+    .recipes-container {
+      max-width: 800px;
+      margin: auto;
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .recipes-container h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+      color: #333;
+    }
+
+    .recipe-card {
+      background: #ffffff;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1.5rem;
+      transition: transform 0.2s ease;
+    }
+
+    .recipe-card:hover {
+      transform: scale(1.02);
+    }
+
+    .recipe-card h2 {
+      font-size: 1.5rem;
+      color: #333;
+    }
+
+    .recipe-card p {
+      color: #555;
+    }
+
+    .recipe-card .actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1rem;
+    }
+
+    .recipe-card button {
+      padding: 0.5rem 1rem;
+      border: none;
+      background-color: #ff7043;
+      color: white;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .recipe-card button:hover {
+      background-color: #ff5722;
+    }
+
+    .error-message {
+      color: red;
+      text-align: center;
+    }
+
+    .add-recipe-btn {
+      display: block;
+      width: 200px;
+      margin: 1rem auto;
+      padding: 0.8rem;
+      background-color: #4caf50;
+      color: white;
+      font-size: 1.2rem;
+      text-align: center;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .add-recipe-btn:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div class="recipes-container">
+    <h1>My Recipes</h1>
+    <button class="add-recipe-btn" onclick="window.location.href = 'createrecipe.html';">Add New Recipe</button>
+    <div id="recipes-container"></div>
+    <div class="error-message" id="errorMessage"></div>
+    <a href="index.html"><button class = "title">Home</button></a>
+  </div>
+
+  <script>
+    async function fetchMyRecipes() {
+      const token = localStorage.getItem('token');
+      const container = document.getElementById('recipes-container');
+
+      if (!token) {
+        container.innerHTML = 'Please log in first.';
+        return;
+      }
+
+      try {
+        container.innerHTML = '<p>Loading your recipes...</p>';
+        const response = await fetch('http://localhost:5000/api/my-recipes', {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + token
+          }
+        });
+
+        const recipes = await response.json();
+
+        if (!Array.isArray(recipes)) {
+          container.innerHTML = 'Failed to load your recipes.';
+          return;
+        }
+
+        if (recipes.length === 0) {
+          container.innerHTML = 'You have not created any recipes yet.';
+          return;
+        }
+
+        container.innerHTML = '';
+
+        recipes.forEach(recipe => {
+          const card = document.createElement('div');
+          card.className = 'recipe-card';
+
+          card.innerHTML = `
+            <h2>${recipe.name}</h2>
+            <p><strong>Calories:</strong> ${recipe.nutrition?.[0] ?? 'N/A'}</p>
+            <p><strong>Protein:</strong> ${recipe.nutrition?.[4] ?? 'N/A'}</p>
+            <p><strong>Ingredients:</strong> ${(recipe.ingredients || []).join(', ')}</p>
+            <div class="actions">
+              <button onclick="editRecipe('${recipe._id}')">Edit</button>
+              <button onclick="deleteRecipe('${recipe._id}')">Delete</button>
+            </div>
+          `;
+
+          container.appendChild(card);
+        });
+
+      } catch (err) {
+        console.error('Error fetching recipes:', err);
+        container.innerHTML = 'Something went wrong.';
+      }
+    }
+
+    window.editRecipe = function(recipeId) {
+      window.location.href = `edit-recipe.html?id=${recipeId}`;
+    };
+
+    window.deleteRecipe = async function(id) {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        alert('Please log in first.');
+        return;
+      }
+
+      const confirmDelete = confirm('Are you sure you want to delete this recipe?');
+      if (!confirmDelete) return;
+
+      try {
+        const response = await fetch(`http://localhost:5000/api/recipes/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          alert('Recipe deleted successfully.');
+          fetchMyRecipes(); // Refresh list
+        } else {
+          alert(result.message || 'Failed to delete recipe.');
+        }
+      } catch (error) {
+        console.error('Delete error:', error);
+        alert('Error deleting recipe. Please try again.');
+      }
+    };
+
+    window.addEventListener('load', fetchMyRecipes);
+  </script>
+  
+</body>
+</html>

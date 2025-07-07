@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Recipe</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 2rem;
+      background: #fffdf8;
+    }
+
+    .form-box {
+      max-width: 600px;
+      margin: auto;
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-box h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+      color: #333;
+    }
+
+    .inputbox {
+      margin-bottom: 1rem;
+    }
+
+    .inputbox label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #444;
+    }
+
+    .inputbox input, .inputbox textarea {
+      width: 100%;
+      padding: 0.8rem;
+      margin-top: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+
+    .inputbox textarea {
+      height: 120px;
+      resize: vertical;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      background-color: #ff7043;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #ff5722;
+    }
+
+    .error-message {
+      color: red;
+      margin-top: 1rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-box">
+    <h1>Create Recipe</h1>
+    <form id="createRecipeForm">
+      <div class="inputbox">
+        <label for="title">Recipe Title</label>
+        <input type="text" id="title" required />
+      </div>
+
+      <div class="inputbox">
+        <label for="ingredients">Ingredients (comma-separated)</label>
+        <input type="text" id="ingredients" required />
+      </div>
+
+      <div class="inputbox">
+        <label for="nutrition">Nutrition (calories, protein) separated by a comma</label>
+        <input type="text" id="nutrition" required />
+      </div>
+
+      <div class="inputbox">
+        <label for="instructions">Instructions</label>
+        <textarea id="instructions" required></textarea>
+      </div>
+
+      <button type="submit">Create Recipe</button>
+
+      <div class="error-message" id="errorMessage"></div>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('createRecipeForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const title = document.getElementById('title').value.trim();
+      const ingredients = document.getElementById('ingredients').value.trim().split(',');
+      const nutrition = document.getElementById('nutrition').value.trim().split(',');
+      const instructions = document.getElementById('instructions').value.trim();
+
+      const recipeData = {
+        title,
+        ingredients,
+        nutrition: nutrition.map(num => parseFloat(num.trim())),
+        instructions,
+      };
+
+      try {
+        const response = await fetch('http://localhost:5000/api/createRecipe', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`, // Use token if available
+          },
+          body: JSON.stringify(recipeData),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          window.location.href = 'index.html'; // Redirect after successful creation
+        } else {
+          document.getElementById('errorMessage').innerText = data.message;
+        }
+      } catch (error) {
+        document.getElementById('errorMessage').innerText = 'Something went wrong. Please try again later.';
+      }
+    });
+  </script>
+</body>
+</html>

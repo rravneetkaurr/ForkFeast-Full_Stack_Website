@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="login.css">
+  <title>Register | The Food Gurukul</title>
+</head>
+<body background="assets/header.jpg">
+    <section>
+        <div class="form-box">
+            <div class="form-value">
+                <form id="registerForm">
+                    <h2>Register</h2>
+
+                    <div class="inputbox">
+                        <ion-icon name="mail-outline"></ion-icon>
+                        <input type="email" id="email" required>
+                        <label for="">Primary Email</label>
+                    </div>
+
+                    <div class="inputbox">
+                        <ion-icon name="lock-closed-outline"></ion-icon>
+                        <input type="password" id="password" required>
+                        <label for="">Password</label>
+                    </div>
+
+                    <div class="inputbox">
+                        <ion-icon name="call-outline"></ion-icon>
+                        <input type="text" id="phone" required>
+                        <label for="">Phone Number</label>
+                    </div>
+
+                    <div class="inputbox">
+                        <ion-icon name="mail-outline"></ion-icon>
+                        <input type="email" id="alternateEmail">
+                        <label for="">Alternate Email</label>
+                    </div>
+
+                    <div class="inputbox">
+                        <ion-icon name="home-outline"></ion-icon>
+                        <input type="text" id="address">
+                        <label for="">Address</label>
+                    </div>
+
+                    <button type="submit">Register</button>
+
+                    <div class="login">
+                        <p>Already have an account? <a href="login.html">Login</a></p>
+                    </div>
+
+                </form>
+                <p id="message"></p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+      document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const phone = document.getElementById('phone').value;
+        const alternateEmail = document.getElementById('alternateEmail').value;
+        const address = document.getElementById('address').value;
+
+        const response = await fetch('http://localhost:5000/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, phone, alternateEmail, address })
+        });
+
+        const data = await response.json();
+
+        const message = document.getElementById('message');
+        if (data.success) {
+          message.style.color = 'green';
+          message.textContent = "Registration successful! Redirecting to login page...";
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 2000);
+        } else {
+          message.style.color = 'red';
+          message.textContent = data.message || "Registration failed.";
+        }
+      });
+    </script>
+
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+</body>
+</html>
