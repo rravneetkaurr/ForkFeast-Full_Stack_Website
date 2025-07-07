@@ -1,5 +1,5 @@
 # ForkFeast-Full_Stack_Website
-A full-stack website featuring a visually appealing frontend and a connected backend, enabling seamless recipe sharing and blogging.
+A FULL-STACK WEBSITE FEATURING A VISUALLY APPEALING FRONTEND AND A CONNECTED BACKEND, ENABLING SEAMLESS RECIPE SHARING AND BLOGGING.
 
 In today’s fast-paced world, where health consciousness and time efficiency are paramount,the need for a personalized, intuitive, and dynamic platform that helps users discover, manage,and track food recipes has become increasingly relevant. The project titled “Fork & Feast” isan intelligent recipe management and discovery platform designed to meet the evolvingculinary and health-related needs of modern users. This project aims to bring a holisticexperience to users who want to plan their meals based on specific ingredients, nutritionalcontent, or calorie goals, while also allowing them to store and manage their personal recipecollections securely.
 
